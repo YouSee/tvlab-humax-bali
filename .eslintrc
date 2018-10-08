@@ -1,0 +1,53 @@
+{
+  "extends": [
+    "airbnb",
+    "prettier",
+    "prettier/flowtype"
+  ],
+  "parser": "babel-eslint",
+  "env": {
+    "node": true,
+    "es6": true,
+    "jest": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "ecmaFeatures": {
+      "modules": true,
+      "arrowFunctions": true,
+      "es6": true,
+      "commonjs": true
+    }
+  },
+  "plugins": [
+    "babel",
+    "promise",
+    "prettier",
+    "flowtype"
+  ],
+  "rules": {
+    "semi": [2, "never"],
+    "no-unused-vars": [2, {
+        "vars": "local",
+        "args": "none"
+    }],
+    "function-paren-newline": ["error", "consistent"],
+    "object-curly-newline": ["error", {
+        "ObjectExpression": { "consistent": true },
+        "ObjectPattern": { "consistent": true }
+    }],
+    "curly": ["error", "multi-or-nest"],
+    "allowEmptyCatch": 0,
+    "newline-per-chained-call": 0,
+    "no-empty-function": "error",
+    "prettier/prettier": "error"
+  },
+  "settings": {
+    "import/extensions": ["js"],
+    "import/resolver": {
+      "webpack": {
+        "config": "webpack.config.js"
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+.DS_STORE
+*.log
+/node_modules
+/public
+dist
+coverage
+npm-debug.log
+.yarn-cache
+swagger.json
+.tern-port
+.idea
+.vscode
+*.swp
+*.swo
+*.swn
+*.swm
