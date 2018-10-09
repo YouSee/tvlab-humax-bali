@@ -27,6 +27,7 @@
     "@babel/runtime": "^7.1.2",
     "@koa/cors": "^2.2.2",
     "babel-polyfill": "^6.26.0",
+    "cote": "^0.18.0",
     "koa": "^2.5.3",
     "koa-bodyparser": "^4.2.1",
     "koa-helmet": "^4.0.0",
@@ -37,7 +38,9 @@
     "lodash": "^4.17.11",
     "request": "^2.88.0",
     "request-promise": "^4.2.2",
-    "spdy": "^3.4.7"
+    "socket.io": "^2.1.1",
+    "spdy": "^3.4.7",
+    "winston": "^3.1.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",

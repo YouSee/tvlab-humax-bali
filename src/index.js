@@ -1,36 +1,41 @@
 // @flow
 
 import http from 'http'
-import http2 from 'spdy'
-import fs from 'fs'
+import cote from 'cote'
+// import http2 from 'spdy'
 import Koa from 'koa'
 import helmet from 'koa-helmet'
-import logger from 'koa-logger'
-import enforceHttps from 'koa-sslify'
-import bodyParser from 'koa-bodyparser'
+import koalogger from 'koa-logger'
+// import enforceHttps from 'koa-sslify'
+// import bodyParser from 'koa-bodyparser'
 import cors from '@koa/cors'
-import router from './router'
+import socketio from 'socket.io'
+import logger from './logger'
+// import router from './router'
 
 const app = new Koa()
 app
-  .use(logger())
+  .use(koalogger())
   .use(cors())
   .use(helmet())
-  .use(bodyParser({ jsonLimit: '2mb' }))
+//   .use(bodyParser({ jsonLimit: '2mb' }))
 
 // Error handler
 app.use(async (ctx, next) => {
   try {
     await next()
   } catch (e) {
-    // console.log(e)
+    logger.error(e)
     ctx.status = e.status || 500
     ctx.body = { error: e, errorMessage: e.message }
     ctx.app.emit('error', e, ctx)
   }
 })
 
-router.configure(app)
+// Use REST API Router
+// router.configure(app)
+
+const io = socketio.listen(app)
 
 // TODO Build for production using TLS
 // Start app
@@ -50,11 +55,62 @@ router.configure(app)
 //   }
 // } else { }
 
-app.server = http.createServer(app.callback()).listen(3000)
+// app.server = http.createServer(app.callback()).listen(3000)
 
-// TODO Remove console.log
-// console.log(`Server started, listening on port: ${config.app.port}`)
-// console.log(`Service: ${config.app.name}`)
-// console.log(`Environment: ${config.app.env}`)
+const port = process.argv[2] || 5555
+app.server = http.createServer(app.callback()).listen(port)
 
-export default app.server
+logger.info(`Server started, listening on port: ${port}`)
+logger.info(`Service: Humax bandwidth limiter`)
+logger.info(`Environment: ${process.env.NODE_ENV}`)
+
+// TODO Refactor sockend, publishers and subscribers
+io.on('connection', socket => {
+  // TODO Detect device IP address and use it as a room name
+  const room = 'room1'
+  socket.join(room)
+})
+
+const sockend = new cote.Sockend(io, {
+  name: 'Humax Sockend bandwidth limiter server',
+  key: 'state'
+})
+
+const humaxPublisher = new cote.Publisher({
+  name: 'humax publisher',
+  namespace: 'humax',
+  broadcasts: ['updateState'],
+})
+
+io.on('changeChannel', socket => {
+  // const socketRoom = socket.room
+  // TODO Update humax state to all devices from the same IP address
+  // const state = { test: 'test }
+  // humaxPublisher.publish('updateState', { state, __room: 'room1' });
+})
+
+const updateSubscriber = new cote.Subscriber({
+  name: 'Humax bandwidth notification subscriber',
+  namespace: 'humax',
+  key: 'state',
+  subscribesTo: ['updateState'],
+})
+
+updateSubscriber.on('updateState', request => {
+  logger.info(`Subscriber is notified of ${request}`)
+})
+
+// Graceful shutdown
+const shutdown = () => {
+  logger.info(`Graceful shutdown start ${new Date().toISOString()}`)
+  app.server.close()
+  process.exit()
+}
+
+process.on('SIGTERM', () => {
+  shutdown()
+})
+
+process.on('SIGINT', () => {
+  shutdown()
+})
